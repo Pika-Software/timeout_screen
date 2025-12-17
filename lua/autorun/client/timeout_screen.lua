@@ -33,35 +33,28 @@ Add( "OnScreenSizeChanged", addonName, function( _, __, width, height )
     vmin = min( width, height )
 end )
 
-local SetDrawColor, SetMaterial, DrawRect, DrawTexturedRect
-do
-    local surface = _G.surface
-    SetDrawColor, SetMaterial, DrawRect, DrawTexturedRect = surface.SetDrawColor, surface.SetMaterial, surface.DrawRect, surface.DrawTexturedRect
-end
 
+local SetDrawColor, SetMaterial, DrawRect, DrawTexturedRect = surface.SetDrawColor, surface.SetMaterial, surface.DrawRect, surface.DrawTexturedRect
 local material = _G.Material( "pikasoft/timeout_screen/cats" )
 
 Add( "PostDrawHUD", addonName, function()
-    if not isInTimeout then
-        return nil
+    if isInTimeout then
+        SetDrawColor( 0, 0, 0, alpha )
+        DrawRect( 0, 0, screenWidth, screenHeight )
+
+        if alpha == 255 then
+            SetDrawColor( 255, 255, 255, alpha )
+            SetMaterial( material )
+
+            DrawTexturedRect( ( screenWidth - ( vmin * 0.5 ) ) * 0.5, ( screenHeight - ( vmin * 0.4 ) ) * 0.5, vmin * 0.5, vmin * 0.4 )
+        end
     end
-
-    SetDrawColor( 0, 0, 0, alpha )
-    DrawRect( 0, 0, screenWidth, screenHeight )
-
-    if alpha == 255 then
-        SetDrawColor( 255, 255, 255, alpha )
-        SetMaterial( material )
-
-        DrawTexturedRect( ( screenWidth - ( vmin * 0.5 ) ) * 0.5, ( screenHeight - ( vmin * 0.4 ) ) * 0.5, vmin * 0.5, vmin * 0.4 )
-    end
-
-    return nil
 end )
 
 Add( "CreateMove", addonName, function( cmd )
     if alpha == 255 then
         cmd:ClearMovement()
+        cmd:SetImpulse( 0 )
         cmd:ClearButtons()
         return true
     end
